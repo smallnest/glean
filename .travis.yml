@@ -9,7 +9,7 @@ before_script:
   - go get -t -v github.com/smallnest/glean/...
 
 script:
- - go test -v .
+ - go build .
 
 notifications:
   email:

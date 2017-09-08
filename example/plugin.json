@@ -1,0 +1,16 @@
+[
+    {
+        "id": "EF5A35EC-46EB-4E62-8251-78F1A49FA7DC",
+        "file": "example/test/plugins/plugin2/plugin2.so",
+        "name": "Add",
+        "version": "1.0",
+        "sha1": ""
+    },
+    {
+        "id": "2E8FD057-99EC-41B9-8172-0EBF18F9A48D",
+        "file": "example/test/plugins/plugin2/plugin2.so",
+        "name": "V",
+        "version": "1.0",
+        "sha1": ""
+    }
+]

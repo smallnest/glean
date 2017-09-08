@@ -20,4 +20,4 @@ go get -u github.com/smallnest/glean
 
 ## Examples
 
-see [Examples](https://github.com/smallnest/glean/tree/master/example)
+see [Examples](https://github.com/smallnest/glean/tree/master/_example)

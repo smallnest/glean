@@ -56,7 +56,7 @@ func Reload(so, name string, vPtr interface{}) error {
 	return nil
 }
 
-// ReloadFromPlugin loads a funtion or a variable from *plugin.Plugin.
+// ReloadFromPlugin loads a function or a variable from *plugin.Plugin.
 func ReloadFromPlugin(p *plugin.Plugin, name string, vPtr interface{}) error {
 	var err error
 	defer func() {

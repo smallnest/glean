@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"plugin"
+	"reflect"
 	"sync"
 
 	multierror "github.com/hashicorp/go-multierror"
@@ -272,4 +273,44 @@ func (g *Glean) ReloadAndWatch(id string, vPtr interface{}) error {
 	g.Watch(id, vPtr)
 
 	return nil
+}
+
+// GetObjectByID gets the variable or function by ID.
+func (g *Glean) GetObjectByID(id string) (v interface{}) {
+	g.mu.RLock()
+	v = g.idMap[id].v
+	g.mu.RUnlock()
+	return v
+}
+
+// GetSymbolByID gets symbol from configured file.
+func (g *Glean) GetSymbolByID(id string) (v interface{}, err error) {
+	g.mu.RLock()
+	v, err = g.idMap[id].Cached.Lookup(g.idMap[id].Name)
+	g.mu.RUnlock()
+	return v, err
+}
+
+// FindAllPlugins gets all IDs that implements interface t.
+func (g *Glean) FindAllPlugins(t reflect.Type) ([]string, error) {
+	if t.Kind() != reflect.Interface {
+		return nil, errors.New("parameter i is not an interface type")
+	}
+
+	var ids []string
+	g.mu.RLock()
+	for id, item := range g.idMap {
+		if item.v != nil {
+			if reflect.TypeOf(item.v).Implements(t) {
+				ids = append(ids, id)
+			}
+		} else {
+			s, err := item.Cached.Lookup(item.Name)
+			if err == nil && reflect.ValueOf(s).Elem().Type().Implements(t) {
+				ids = append(ids, id)
+			}
+		}
+	}
+
+	return ids, nil
 }

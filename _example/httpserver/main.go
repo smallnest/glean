@@ -27,10 +27,6 @@ func main() {
 	log.Fatal(http.ListenAndServe(":9988", nil))
 }
 
-func test(fooHandler func(w http.ResponseWriter, r *http.Request)) {
-	fooHandler = nil
-}
-
 func WarpFuncPtr(fn *func(w http.ResponseWriter, r *http.Request)) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		(*fn)(w, r)

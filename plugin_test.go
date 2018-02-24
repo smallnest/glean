@@ -5,8 +5,11 @@
 package glean
 
 import "testing"
+import "github.com/smallnest/glean/log"
 
 func TestGP_LoadConfig(t *testing.T) {
+	log.SetDummyLogger()
+
 	tests := []struct {
 		name    string
 		g       *Glean
@@ -14,7 +17,7 @@ func TestGP_LoadConfig(t *testing.T) {
 	}{
 		{
 			name:    "normal",
-			g:       New("./example/plugin.json"),
+			g:       New("plugin_test.json"),
 			wantErr: false,
 		},
 	}

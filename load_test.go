@@ -7,9 +7,13 @@ package glean
 import (
 	"plugin"
 	"testing"
+
+	"github.com/smallnest/glean/log"
 )
 
 func TestLoadSymbol(t *testing.T) {
+	log.SetDummyLogger()
+
 	type args struct {
 		so   string
 		name string
@@ -23,7 +27,7 @@ func TestLoadSymbol(t *testing.T) {
 		{
 			"Add",
 			args{
-				"example/test/plugins/plugin1/plugin1.so",
+				"_example/test/plugins/plugin1/plugin1.so",
 				"Add",
 			},
 			nil,
@@ -32,7 +36,7 @@ func TestLoadSymbol(t *testing.T) {
 		{
 			"v",
 			args{
-				"example/test/plugins/plugin1/plugin1.so",
+				"_example/test/plugins/plugin1/plugin1.so",
 				"v",
 			},
 			nil,
@@ -41,7 +45,7 @@ func TestLoadSymbol(t *testing.T) {
 		{
 			"nonExisted",
 			args{
-				"example/test/plugins/pluginabc/plugin1.so",
+				"_example/test/plugins/pluginabc/plugin1.so",
 				"Add",
 			},
 			nil,
@@ -79,7 +83,7 @@ func TestReload(t *testing.T) {
 		{
 			"Add",
 			args{
-				"example/test/plugins/plugin1/plugin1.so",
+				"_example/test/plugins/plugin1/plugin1.so",
 				"Add",
 				&fn,
 			},
@@ -88,7 +92,7 @@ func TestReload(t *testing.T) {
 		{
 			"V",
 			args{
-				"example/test/plugins/plugin1/plugin1.so",
+				"_example/test/plugins/plugin1/plugin1.so",
 				"V",
 				&v,
 			},
@@ -97,7 +101,7 @@ func TestReload(t *testing.T) {
 		{
 			"v",
 			args{
-				"example/test/plugins/plugin1/plugin1.so",
+				"_example/test/plugins/plugin1/plugin1.so",
 				"v",
 				&v,
 			},
@@ -106,7 +110,7 @@ func TestReload(t *testing.T) {
 		{
 			"nonExisted",
 			args{
-				"example/test/plugins/pluginabc/plugin1.so",
+				"_example/test/plugins/pluginabc/plugin1.so",
 				"Add",
 				&fn,
 			},
@@ -126,7 +130,7 @@ func TestReloadFromPlugin(t *testing.T) {
 	var fn func(x, y int) int
 	var v int
 
-	p, err := plugin.Open("example/test/plugins/plugin1/plugin1.so")
+	p, err := plugin.Open("_example/test/plugins/plugin1/plugin1.so")
 	if err != nil {
 		t.Fatalf("failed to open: %v", err)
 	}

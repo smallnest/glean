@@ -9,12 +9,12 @@ vet:
 	go vet .
 
 tools:
-	go get honnef.co/go/tools/cmd/staticcheck
-	go get honnef.co/go/tools/cmd/gosimple
-	go get honnef.co/go/tools/cmd/unused
-	go get github.com/gordonklaus/ineffassign
-	go get github.com/fzipp/gocyclo
-	go get github.com/golang/lint/golint
+	go get -u honnef.co/go/tools/cmd/staticcheck
+	go get -u honnef.co/go/tools/cmd/gosimple
+	go get -u honnef.co/go/tools/cmd/unused
+	go get -u github.com/gordonklaus/ineffassign
+	go get -u github.com/fzipp/gocyclo
+	go get -u github.com/golang/lint/golint
 
 lint:
 	golint ./...
@@ -23,7 +23,8 @@ staticcheck:
 	staticcheck -ignore "$(shell cat .checkignore)" .
 
 gosimple:
-	gosimple -ignore "$(shell cat .gosimpleignore)" .
+	# gosimple -ignore "$(shell cat .gosimpleignore)" .
+	gosimple .
 
 unused:
 	unused .
@@ -46,4 +47,4 @@ build:
 	go build .
 
 test:
-	go test .
+	go test  -v .

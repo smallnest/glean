@@ -1,9 +1,8 @@
 [
     {
-        "id": "EF5A35EC-46EB-4E62-8251-78F1A49FA7DC",
-        "file": "plugins/plugin2/plugin2.so",
+        "id": "FooHandlerID",
+        "file": "plugins/plugin1/plugin1.so",
         "name": "FooHandler",
-        "version": "1.0",
-        "sha1": ""
+        "version": "1.0"
     }
 ]

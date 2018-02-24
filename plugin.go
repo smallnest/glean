@@ -8,33 +8,39 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"plugin"
 	"reflect"
 	"sync"
 
 	multierror "github.com/hashicorp/go-multierror"
-	"github.com/smallnest/logi"
+	"github.com/smallnest/glean/log"
 	fsnotify "gopkg.in/fsnotify.v1"
 )
 
 var (
-	ErrItemHasNotConfigured = errors.New("PluginItem is not configured")
-	ErrClosed               = errors.New("GoPlugin has been closed")
+	// ErrItemHasNotConfigured the plugin item has not been configured.
+	ErrItemHasNotConfigured = errors.New("pluginItem is not configured")
+	// ErrClosed glean instance has been closed.
+	ErrClosed = errors.New("glean has been closed")
 )
 
-// PluginItem is ...
+// PluginItem is a configured item that can be reloaded.
 type PluginItem struct {
-	File    string         `json:"file"`
-	ID      string         `json:"id"`
-	Name    string         `json:"name"`
-	Sha1    string         `json:"sha1"`
-	Version string         `json:"version"`
-	Cached  *plugin.Plugin `json:"-"`
-	v       interface{}    `json:"-"`
+	// File file path of this plugin.
+	File string `json:"file"`
+	// ID is an unique string for this item.
+	ID string `json:"id"`
+	// Name is name of the symbol. Notice id is unique but names may be duplicated in different plugins.
+	Name string `json:"name"`
+	// Version is version of the plugin for tracing and upgrade.
+	Version string `json:"version"`
+	// Cached points the opened plugin.
+	Cached *plugin.Plugin `json:"-"`
+	// v is the function or variable that can be reloaded.
+	v interface{}
 }
 
-// Glean is ...
+// Glean is a manager that manages all configured plugins and reloaded objects.
 type Glean struct {
 	configFile  string
 	pluginItems []*PluginItem
@@ -55,7 +61,7 @@ func New(configFile string) *Glean {
 	}
 }
 
-// Close cleans Glean and stop watching.
+// Close closes Glean and stop watching.
 func (g *Glean) Close() {
 	g.mu.Lock()
 	if !g.closed {
@@ -68,11 +74,11 @@ func (g *Glean) Close() {
 	g.mu.Unlock()
 }
 
-// LoadConfig loads plugins in the config file.
+// LoadConfig loads plugins from the configured file.
 func (g *Glean) LoadConfig() (err error) {
 	buf, err := ioutil.ReadFile(g.configFile)
 	if err != nil {
-		logi.Errorf("failed to load %s: %v", g.configFile, err)
+		log.Errorf("failed to load %s: %v", g.configFile, err)
 		return err
 	}
 
@@ -81,7 +87,7 @@ func (g *Glean) LoadConfig() (err error) {
 
 	err = json.Unmarshal(buf, &(g.pluginItems))
 	if err != nil {
-		logi.Errorf("failed to unmarshal %s: %v", g.configFile, err)
+		log.Errorf("failed to unmarshal %s: %v", g.configFile, err)
 		return err
 	}
 
@@ -89,7 +95,7 @@ func (g *Glean) LoadConfig() (err error) {
 	for _, item := range g.pluginItems {
 		pp, err := plugin.Open(item.File)
 		if err != nil {
-			logi.Errorf("failed to load %s: %v", item.Name, err)
+			log.Errorf("failed to load %s: %v", item.Name, err)
 			return err
 		}
 
@@ -97,6 +103,7 @@ func (g *Glean) LoadConfig() (err error) {
 		g.idMap[item.ID] = item
 	}
 
+	// watch changes
 	err = g.startWatch()
 	return
 }
@@ -109,7 +116,7 @@ func (g *Glean) startWatch() error {
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		logi.Fatal(err)
+		log.Fatal(err)
 		return err
 	}
 
@@ -124,13 +131,13 @@ func (g *Glean) startWatch() error {
 		for {
 			select {
 			case event := <-watcher.Events:
-				logi.Info("watch event:", event)
+				log.Info("watch event:", event)
 				if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Rename == fsnotify.Rename {
-					logi.Infof("config file %s is modified", event.Name)
+					log.Infof("config file %s is modified", event.Name)
 					g.checkChanges() // the config file has been modified
 				}
 			case err := <-watcher.Errors:
-				logi.Errorf("watcher error: %v", err)
+				log.Errorf("watcher error: %v", err)
 			case <-g.done:
 				break watch
 			}
@@ -143,7 +150,7 @@ func (g *Glean) startWatch() error {
 func (g *Glean) checkChanges() {
 	buf, err := ioutil.ReadFile(g.configFile)
 	if err != nil {
-		logi.Errorf("failed to load %s: %v", g.configFile, err)
+		log.Errorf("failed to load %s: %v", g.configFile, err)
 		return
 	}
 
@@ -151,7 +158,7 @@ func (g *Glean) checkChanges() {
 
 	err = json.Unmarshal(buf, &(latestPluginItems))
 	if err != nil {
-		logi.Errorf("failed to unmarshal %s: %v", g.configFile, err)
+		log.Errorf("failed to unmarshal %s: %v", g.configFile, err)
 		return
 	}
 
@@ -170,7 +177,7 @@ func (g *Glean) checkChanges() {
 	for _, item := range changed {
 		pp, e := plugin.Open(item.File)
 		if e != nil {
-			logi.Errorf("failed to load %s: %v", item.Name, e)
+			log.Errorf("failed to load %s: %v", item.Name, e)
 			err = multierror.Append(err, e)
 		}
 		item.Cached = pp
@@ -182,7 +189,7 @@ func (g *Glean) checkChanges() {
 	for _, item := range added {
 		pp, e := plugin.Open(item.File)
 		if e != nil {
-			logi.Errorf("failed to load %s: %v", item.Name, e)
+			log.Errorf("failed to load %s: %v", item.Name, e)
 			err = multierror.Append(err, e)
 		}
 		item.Cached = pp
@@ -196,10 +203,10 @@ func (g *Glean) checkChanges() {
 		if watchID {
 			e := ReloadFromPlugin(item.Cached, item.Name, item.v)
 			if e != nil {
-				logi.Errorf("failed to reload %s, %s from %s: %v", item.ID, item.Name, item.File, err)
+				log.Errorf("failed to reload %s, %s from %s: %v", item.ID, item.Name, item.File, err)
 				err = multierror.Append(err, e)
 			} else {
-				logi.Infof("succeeded to reload %s, %s from %s", item.ID, item.Name, item.File)
+				log.Infof("succeeded to reload %s, %s from %s", item.ID, item.Name, item.File)
 			}
 		}
 	}
@@ -235,7 +242,7 @@ func diffPlugins(currentPluginItems, latestPluginItems []*PluginItem) (added, ch
 	return
 }
 
-// Reload loads an variable or function from plugins.
+// Reload loads an variable or function from configured plugins.
 func (g *Glean) Reload(id string, vPtr interface{}) error {
 	if g.closed {
 		return ErrClosed
@@ -252,7 +259,7 @@ func (g *Glean) Reload(id string, vPtr interface{}) error {
 	return ReloadFromPlugin(item.Cached, item.Name, vPtr)
 }
 
-// Watch watches plugin changes and reload  this function/variable automatically.
+// Watch watches plugin changes and reload given function/variable automatically.
 func (g *Glean) Watch(id string, vPtr interface{}) {
 	g.mu.Lock()
 	g.watched[id] = true
@@ -283,7 +290,7 @@ func (g *Glean) GetObjectByID(id string) (v interface{}) {
 	return v
 }
 
-// GetSymbolByID gets symbol from configured file.
+// GetSymbolByID gets the variable or function by ID from cached plugin.
 func (g *Glean) GetSymbolByID(id string) (v interface{}, err error) {
 	g.mu.RLock()
 	v, err = g.idMap[id].Cached.Lookup(g.idMap[id].Name)

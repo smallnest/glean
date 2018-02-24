@@ -16,7 +16,7 @@ func main() {
 
 	var fooHandler func(w http.ResponseWriter, r *http.Request)
 
-	err = g.ReloadAndWatch("EF5A35EC-46EB-4E62-8251-78F1A49FA7DC", &fooHandler)
+	err = g.ReloadAndWatch("FooHandlerID", &fooHandler)
 
 	if err != nil {
 		panic(err)

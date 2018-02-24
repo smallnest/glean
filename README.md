@@ -52,13 +52,13 @@ var FooHandler = func(w http.ResponseWriter, r *http.Request) {
 
 No need to restart this server.
 
-** step1: ** build the two plugin
+**step1:** build the two plugin
 
 enter `_example/httpserver/plugins/plugin1` and `_example/httpserver/plugins/plugin2`, and run the `build.sh` to generate the so file.
 
 Currently plugin supports linux and MacOS.
 
-** step2: ** modify the server implementation
+**step2:** modify the server implementation
 
 ```go
 package main

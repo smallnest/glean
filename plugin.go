@@ -306,6 +306,8 @@ func (g *Glean) FindAllPlugins(t reflect.Type) ([]string, error) {
 
 	var ids []string
 	g.mu.RLock()
+	defer g.mu.RUnlock()
+
 	for id, item := range g.idMap {
 		if item.v != nil {
 			if reflect.TypeOf(item.v).Implements(t) {

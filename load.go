@@ -48,7 +48,15 @@ func Reload(so, name string, vPtr interface{}) error {
 		return err
 	}
 
+	if reflect.ValueOf(vPtr).CanSet() {
+		reflect.ValueOf(vPtr).Set(reflect.ValueOf(s))
+		return nil
+	}
 	v := reflect.ValueOf(vPtr).Elem()
+
+	if !v.CanSet() {
+
+	}
 	if v.Kind() == reflect.Func {
 		v.Set(reflect.ValueOf(s))
 	} else {
@@ -75,7 +83,19 @@ func ReloadFromPlugin(p *plugin.Plugin, name string, vPtr interface{}) error {
 		return err
 	}
 
+	if reflect.ValueOf(vPtr).CanSet() {
+		reflect.ValueOf(vPtr).Set(reflect.ValueOf(s))
+		return nil
+	}
 	v := reflect.ValueOf(vPtr).Elem()
-	v.Set(reflect.ValueOf(s).Elem())
+	if !v.CanSet() {
+
+	}
+
+	if v.Kind() == reflect.Func {
+		v.Set(reflect.ValueOf(s))
+	} else {
+		v.Set(reflect.ValueOf(s).Elem())
+	}
 	return nil
 }

@@ -22,6 +22,8 @@ var (
 	ErrItemHasNotConfigured = errors.New("pluginItem is not configured")
 	// ErrClosed glean instance has been closed.
 	ErrClosed = errors.New("glean has been closed")
+	// ErrValueCanNotSet the object can not be set. See https://golang.org/pkg/reflect/#Value.CanSet.
+	ErrValueCanNotSet = errors.New("the object can't be addressable and can not be set")
 )
 
 // PluginItem is a configured item that can be reloaded.

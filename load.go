@@ -55,7 +55,7 @@ func Reload(so, name string, vPtr interface{}) error {
 	v := reflect.ValueOf(vPtr).Elem()
 
 	if !v.CanSet() {
-
+		return ErrValueCanNotSet
 	}
 	if v.Kind() == reflect.Func {
 		v.Set(reflect.ValueOf(s))
@@ -89,7 +89,7 @@ func ReloadFromPlugin(p *plugin.Plugin, name string, vPtr interface{}) error {
 	}
 	v := reflect.ValueOf(vPtr).Elem()
 	if !v.CanSet() {
-
+		return ErrValueCanNotSet
 	}
 
 	if v.Kind() == reflect.Func {

@@ -39,6 +39,12 @@ func TestGP_LoadConfig(t *testing.T) {
 			if err != nil {
 				t.Errorf("failed to reload v: %v", err)
 			}
+
+			if v == 0 {
+				t.Errorf("failed to load v. got %v", v)
+			} else {
+				t.Logf("got v: %v", v)
+			}
 		})
 	}
 }

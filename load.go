@@ -59,13 +59,6 @@ func Reload(so, name string, vPtr interface{}) error {
 	}
 
 	v.Set(reflect.ValueOf(s).Elem())
-
-	// if v.Kind() == reflect.Func {
-	// 	v.Set(reflect.ValueOf(s))
-	// } else {
-	// 	v.Set(reflect.ValueOf(s).Elem())
-	// }
-
 	return nil
 }
 
@@ -92,11 +85,5 @@ func ReloadFromPlugin(p *plugin.Plugin, name string, vPtr interface{}) error {
 	}
 
 	v.Set(reflect.ValueOf(s).Elem())
-
-	// if v.Kind() == reflect.Func {
-	// 	v.Set(reflect.ValueOf(s))
-	// } else {
-	// 	v.Set(reflect.ValueOf(s).Elem())
-	// }
 	return nil
 }

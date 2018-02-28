@@ -43,16 +43,18 @@ func Reload(so, name string, vPtr interface{}) error {
 		}
 	}()
 
+	// a Symbol is a pointer to a variable or function.
 	s, err := LoadSymbol(so, name)
 	if err != nil {
 		return err
 	}
 
-	if reflect.ValueOf(vPtr).CanSet() {
-		reflect.ValueOf(vPtr).Set(reflect.ValueOf(s))
-		return nil
+	vPtrV := reflect.ValueOf(vPtr)
+	if vPtrV.Kind() != reflect.Ptr {
+		return ErrMustBePointer
 	}
-	v := reflect.ValueOf(vPtr).Elem()
+
+	v := vPtrV.Elem()
 
 	if !v.CanSet() {
 		return ErrValueCanNotSet
@@ -79,7 +81,12 @@ func ReloadFromPlugin(p *plugin.Plugin, name string, vPtr interface{}) error {
 		return err
 	}
 
-	v := reflect.ValueOf(vPtr).Elem()
+	vPtrV := reflect.ValueOf(vPtr)
+	if vPtrV.Kind() != reflect.Ptr {
+		return ErrMustBePointer
+	}
+
+	v := vPtrV.Elem()
 	if !v.CanSet() {
 		return ErrValueCanNotSet
 	}

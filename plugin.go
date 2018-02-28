@@ -24,6 +24,8 @@ var (
 	ErrClosed = errors.New("glean has been closed")
 	// ErrValueCanNotSet the object can not be set. See https://golang.org/pkg/reflect/#Value.CanSet.
 	ErrValueCanNotSet = errors.New("the object can't be addressable and can not be set")
+	// ErrMustBePointer the object (function or variable) must be pointer.
+	ErrMustBePointer = errors.New("the function or variable must be pointer")
 )
 
 // PluginItem is a configured item that can be reloaded.
@@ -169,6 +171,7 @@ func (g *Glean) checkChanges() {
 
 	currentPluginItems := g.pluginItems
 	added, changed, removed := diffPlugins(currentPluginItems, latestPluginItems)
+	g.pluginItems = latestPluginItems
 
 	for _, item := range removed {
 		delete(g.idMap, item.ID)
